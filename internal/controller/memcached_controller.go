@@ -100,7 +100,12 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Let's just set the status as Unknown when no status is available
 	if memcached.Status.Conditions == nil || len(memcached.Status.Conditions) == 0 {
-		meta.SetStatusCondition(&memcached.Status.Conditions, metav1.Condition{Type: typeAvailableMemcached, Status: metav1.ConditionUnknown, Reason: "Reconciling", Message: "Starting reconciliation"})
+		meta.SetStatusCondition(&memcached.Status.Conditions, metav1.Condition{
+			Type:    typeAvailableMemcached,
+			Status:  metav1.ConditionUnknown,
+			Reason:  "Reconciling",
+			Message: "Starting reconciliation",
+		})
 		if err = r.Status().Update(ctx, memcached); err != nil {
 			log.Error(err, "Failed to update Memcached status")
 			return ctrl.Result{}, err
@@ -386,7 +391,7 @@ func (r *MemcachedReconciler) deploymentForMemcached(
 							ContainerPort: memcached.Spec.ContainerPort,
 							Name:          "memcached",
 						}},
-						Command: []string{"memcached", "-m=64", "-o", "modern", "-v"},
+						//Command: []string{"memcached", "-m=64", "-o", "modern", "-v"},
 					}},
 				},
 			},
@@ -409,7 +414,8 @@ func labelsForMemcached(name string) map[string]string {
 	if err == nil {
 		imageTag = strings.Split(image, ":")[1]
 	}
-	return map[string]string{"app.kubernetes.io/name": "project",
+	return map[string]string{
+		"app.kubernetes.io/name":       "project",
 		"app.kubernetes.io/version":    imageTag,
 		"app.kubernetes.io/managed-by": "MemcachedController",
 	}
@@ -421,7 +427,7 @@ func imageForMemcached() (string, error) {
 	var imageEnvVar = "MEMCACHED_IMAGE"
 	image, found := os.LookupEnv(imageEnvVar)
 	if !found {
-		return "", fmt.Errorf("Unable to find %s environment variable with the image", imageEnvVar)
+		return "memcached:1.6.26", nil
 	}
 	return image, nil
 }
