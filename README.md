@@ -1,5 +1,6 @@
 # awesomeproject
 - go版本需要设置成`1.21`，否则`make manifests`时会发生错误
+- windows系统controller-gen版本要设置成0.8.0
 
 ## Description
 // TODO(user): An in-depth paragraph about your project and overview of use
